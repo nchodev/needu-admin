@@ -11,6 +11,7 @@ class Like extends Model
     protected $fillable = [
         'liker_id',
         'liked_id',
+        'story_id'
     ];
 
     // Un like appartient à un utilisateur

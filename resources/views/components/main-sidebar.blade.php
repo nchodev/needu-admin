@@ -117,6 +117,12 @@
 
                 </li>
                 <li class="slide">
+                    <a class="side-menu__item" data-bs-toggle="slide" href="{{route('app-setting.index')}}"><i
+                            class="side-menu__icon ri-pages-line"></i><span
+                            class="side-menu__label">App Settings</span></a>
+
+                </li>
+                <li class="slide">
                     <a class="side-menu__item" data-bs-toggle="slide" href="{{route('gifts.index')}}">
                         <i class="side-menu__icon fa fa-gift" aria-hidden="true"></i>
                         <span class="side-menu__label">Gifts</span>

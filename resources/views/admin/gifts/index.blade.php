@@ -99,7 +99,7 @@
                                     <span >{{$data->coin}} Coins</span>
                                 </td>
 
-                                <td class="text-center text-primary d-none d-md-table-cell text-nowrap border-top-0">
+                                <td class="text-center text-primary d-md-table-cell text-nowrap border-top-0">
                                     {{Str::limit($data->name,20, '...')}}
                                 </td>
 

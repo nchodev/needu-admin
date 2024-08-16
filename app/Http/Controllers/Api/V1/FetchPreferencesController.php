@@ -60,6 +60,18 @@ class FetchPreferencesController extends Controller
             $query->where('name', 'life style')->where('status', 1);
         })->where('status', 1)->get();
         return PreferenceAddonResource::collection($data);
-
     }
+    public function status_mood(){
+        $data =  PreferenceAddon::with('children')->whereHas('parent', function ($query) {
+            $query->where('name', 'Status Mood')->where('status', 1);
+        })->where('status', 1)->get();
+        return PreferenceAddonResource::collection($data);
+    }
+    public function gender(){
+        $data =  PreferenceAddon::whereHas('parent', function ($query) {
+            $query->where('name', 'gender')->where('status', 1);
+        })->where('status', 1)->get();
+        return  PreferenceAddonResource::collection($data);
+    }
+
 }

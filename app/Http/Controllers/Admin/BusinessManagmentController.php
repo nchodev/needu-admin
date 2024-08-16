@@ -12,6 +12,10 @@ use Illuminate\Support\Facades\Validator;
 
 class BusinessManagmentController extends Controller
 {
+    public function php_info(){
+
+        return view('admin.settings.php-info');
+    }
     public function business_settings(){
 
         return view('admin.settings.business-setting');

@@ -11,6 +11,7 @@ use Illuminate\Foundation\Configuration\Middleware;
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         commands: __DIR__.'/../routes/console.php',
+        channels: __DIR__.'/../routes/channels.php',
         using: function () {
             Route::middleware('api')
                 ->prefix('api/v1')
@@ -25,7 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->web(append: [
             Localization::class,
-             AdminAuth::class
+             AdminAuth::class,
         ]);
         $middleware->api(prepend: [
             LocalizationApiMiddleware::class,

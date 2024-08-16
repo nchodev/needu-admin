@@ -6,6 +6,8 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::group(['namespace'=>'Admin'], function(){
+    Route::get('/php-info','BusinessManagmentController@php_info');
+
     Route::get('/login','AuthController@show')->withoutMiddleware([AdminAuth::class]);
     Route::post('login','AuthController@login')->name('login')->withoutMiddleware([AdminAuth::class]);
     Route::get('/bulk','PreferenceAddonController@bulk');
@@ -52,6 +54,13 @@ Route::group(['namespace'=>'Admin'], function(){
         Route::post('/update','BusinessManagmentController@update')->name('update');
 
     });
+    Route::group(['prefix'=>'app-setting', 'as'=>'app-setting.'], function(){
+        Route::get('/','BusinessSettingController@app_settings')->name('index');
+        Route::post('/store','BusinessSettingController@update_app_settings')->name('store');
+        // Route::delete('/delete/{id}','BusinessManagmentController@destroy')->name('delete');
+        // Route::get('/edit/{id}','BusinessManagmentController@edit')->name('edit');
+        // Route::post('/update','BusinessManagmentController@update')->name('update');
 
+    });
 
 });

@@ -15,7 +15,7 @@ class PreferenceAddonResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
+            'id' => $this->id,       
             'name' => $this->name,
             'parent' => $this->parent ? $this->parent->name : '',
             'children'=> PreferenceAddonResource::collection($this->whenLoaded('children')),

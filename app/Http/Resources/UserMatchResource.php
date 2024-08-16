@@ -35,6 +35,8 @@ class UserMatchResource extends JsonResource
                 'nick_name' => $oppositeUser->nick_name,
                 'dob' => (string) Carbon::parse($oppositeUser->dob)->age,
                 'avatar' => $oppositeUser->media->first()->file,
+                'stories'=> StatusResource::collection($oppositeUser->activeStories),
+
             ],
             'messages' => $this->messages->isNotEmpty() ? [new MessageResource($this->messages->last())] : [],
         ];

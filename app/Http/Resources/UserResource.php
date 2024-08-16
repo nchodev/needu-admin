@@ -32,6 +32,7 @@ class UserResource extends JsonResource
             'education' => $this->education,
             'company' => $this->company,
             'profession' => $this->profession,
+            'stories_count'=>$this->stories_count,
             'looking_for' => $this->whenLoaded('lookingFor', function () {
                 $preferenceAddonResource = new PreferenceAddonResource($this->lookingFor->preferenceAddon);
                 // Exclure 'parent' de l'array retourné par toArray de PreferenceAddonResource
@@ -39,6 +40,11 @@ class UserResource extends JsonResource
             }),
             'sex_orientation' =>  $this->whenLoaded('sexOrientation', function () {
                 $preferenceAddonResource = new PreferenceAddonResource($this->sexOrientation->preferenceAddon);
+                // Exclure 'parent' de l'array retourné par toArray de PreferenceAddonResource
+                return collect($preferenceAddonResource->toArray(request()))->forget('parent')->toArray();
+            }),
+            'gender' =>  $this->whenLoaded('gender', function () {
+                $preferenceAddonResource = new PreferenceAddonResource($this->gender->preferenceAddon);
                 // Exclure 'parent' de l'array retourné par toArray de PreferenceAddonResource
                 return collect($preferenceAddonResource->toArray(request()))->forget('parent')->toArray();
             }),
@@ -59,7 +65,30 @@ class UserResource extends JsonResource
             }),
             'more_abouts' => PreferenceAddonResource::collection($this->moreAbouts->pluck('preferenceAddon')),
             'life_styles' =>PreferenceAddonResource::collection($this->lifeStyles->pluck('preferenceAddon')),
-            'media' => MediaResource::collection($this->media)
+            'media' => MediaResource::collection($this->media),
+            // 'stories'=>$this->whenLoaded('stories', function () {
+            //     return    StatusResource::collection($this->stories);
+            // }),
+            'preferences' => $this->whenLoaded('preferences', function () {
+                return [
+
+                        "sex_orientation_id" =>$this->preferences->sex_orientation_id,
+                        "gender_id" => $this->preferences->gender_id,
+                        "religion_id" => $this->preferences->religion_id,
+                        "marital_status_id"=> $this->preferences->marital_status_id,
+                        "looking_for_ids"=> $this->preferences->looking_for_ids,
+                        "more_about_ids"=> $this->preferences->more_about_ids,
+                        "life_styles"=> $this->preferences->life_styles,
+                        "spoken_languages"=> $this->preferences->spoken_languages,
+                        "min_age" => $this->preferences->min_age,
+                        "max_age"=> $this->preferences->max_age,
+                        "interests" => $this->preferences->interests,
+                        "country"=> $this->preferences->country,
+                        "max_distance"=>$this->preferences->max_distance
+                ];
+            }),
+
+
 
         ];
     }

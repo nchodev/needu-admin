@@ -22,17 +22,22 @@ class User extends Authenticatable
      *
      * @var array<int, string>
      */
-    protected $with = ['sexOrientation',
-                            'interests',
-                            'lookingFor',
-                            'media',
-                            'spokenLanguages',
-                            'religion',
-                            'maritalStatus',
-                            'moreAbouts',
-                            'lifeStyles',
+    protected $with = [
+        'sexOrientation',
+        'interests',
+        'lookingFor',
+        'media',
+        'spokenLanguages',
+        'religion',
+        'maritalStatus',
+        'moreAbouts',
+        'lifeStyles',
+        'stories',
+        'activeStories',
+        'gender',
+        'preferences'
+        ];
 
-                        ];
     protected $fillable = [
         'email',
         'password',
@@ -43,7 +48,8 @@ class User extends Authenticatable
         'ref_code',
         'current_lang',
         'email_verified_at',
-        'status'
+        'status',
+
     ];
 
     public function lookingFor(): HasOne
@@ -53,6 +59,10 @@ class User extends Authenticatable
     public function sexOrientation(): HasOne
     {
         return $this->hasOne(SexOrientation::class);
+    }
+    public function gender(): HasOne
+    {
+        return $this->hasOne(UserGender::class);
     }
     public function interests(): HasMany
     {
@@ -129,7 +139,24 @@ class User extends Authenticatable
     {
         return $this->hasMany(UserMatch::class, 'user1_id');
     }
+    public function stories(): HasMany
+    {
+        return $this->hasMany(Story::class);
+    }
 
+    public function activeStories()
+
+    {
+        return $this->stories()->active();
+    }
+    public function likedUsers()
+    {
+        return $this->belongsToMany(User::class, 'likes', 'liker_id', 'liked_id');
+    }
+    public function preferences()
+    {
+        return $this->hasOne(UserPreference::class);
+    }
     /**
      * The attributes that should be hidden for serialization.
      *

@@ -140,12 +140,12 @@
                                     {{$data->id}}
                                 </td>
                                 @if (isset($data->parent))
-                                <td class="text-center text-primary d-none d-md-table-cell text-nowrap border-top-0">
+                                <td class="text-center text-primary d-md-table-cell text-nowrap border-top-0">
                                     {{Str::limit($data->parent->name,20, '...')}}
                                 </td>
                                 @endif
 
-                                <td class="text-center text-primary d-none d-md-table-cell text-nowrap border-top-0">
+                                <td class="text-center text-primary  d-md-table-cell text-nowrap border-top-0">
                                     {{Str::limit($data->name,20, '...')}}
                                 </td>
 

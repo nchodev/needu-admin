@@ -15,8 +15,11 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('content');
+            $table->string('thumbnail')->nullable();
+            $table->foreignId('mood_id')->nullable();
+            $table->bigInteger('read_count')->default(0);
             $table->enum('type',['text','video','image'])->default('image');
-            $table->timestamp('expires_at');
+            $table->timestamp('expires_at')->nullable();
             $table->timestamps();
         });
     }
