@@ -22,6 +22,7 @@ use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Resources\PaginatedStatusResource;
+use App\Models\UserInfo;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class UserController extends Controller
@@ -44,7 +45,10 @@ class UserController extends Controller
         $user->dob = $request->birthdate;
         $user->nick_name = $request->nick_name;
         $user->status = 1;
-
+        $userInfo = UserInfo::where('user_id', $request->user()->id)->first();
+        $userInfo->dob = $request->birthdate;
+        $userInfo->nick_name = $request->nick_name;
+        $userInfo->save();
 
         $looking = new LookingFor();
         $looking->user_id = $request->user()->id;
@@ -174,7 +178,17 @@ class UserController extends Controller
                 'latitude' => $request['latitude']
             ]
         );
+        $userInfo = UserInfo::where('user_id', $request->user()->id)->first();
 
+        $userInfo->position = json_encode(
+            [
+                'longitude' => $request['longitude'],
+                'latitude' => $request['latitude']
+            ]
+        );
+        $userInfo->location= $request->address;
+
+        $userInfo->save();
         $user->save();
 
         return response()->json(['message' => 'Position updated successfully']);
@@ -226,6 +240,7 @@ class UserController extends Controller
     public function update_profile(Request $request)
     {
             $user = User::findOrfail($request->user()->id);
+            $userInfo = UserInfo::where('user_id', $request->user()->id)->first();
 
             $user->nick_name = isset($request->nick_name)?$request->nick_name:$user->nick_name;
             $user->phone = isset($request->phone)?$request->phone:$user->phone;
@@ -238,7 +253,18 @@ class UserController extends Controller
             $user->company = isset($request->company)?$request->company:$user->company;
             $user->profession = isset($request->profession)?$request->profession:$user->profession;
 
+            $userInfo->nick_name = isset($request->nick_name)?$request->nick_name:$user->nick_name;
+            $userInfo->phone = isset($request->phone)?$request->phone:$user->phone;
+            $userInfo->email = isset($request->email)?$request->email:$user->email;
+            $userInfo->height = isset($request->height)?$request->height:$user->height;
+            $userInfo->dob = isset($request->dob)?$request->dob:$user->dob;
+            $userInfo->bio = isset($request->bio)?$request->bio:$user->bio;
+            $userInfo->company = isset($request->company)?$request->company:$user->company;
+            $userInfo->profession = isset($request->profession)?$request->profession:$user->profession;
+            $userInfo->education = isset($request->education)?$request->education:$user->education;
+
             $user->save();
+            $userInfo->save();
             if(isset($request->sex_orientation)){
                 $se= SexOrientation::Where('user_id' , $request->user()->id)->first();
                 $se->preference_addon_id =$request->sex_orientation;
@@ -400,5 +426,14 @@ class UserController extends Controller
     return response()->json(['message' => translate('messages.profile_update')]);
 
 
+    }
+    public function delete(Request $request){
+
+        $user = $request->user();
+        if($user){
+            $user->delete();
+            return response()->json(['message' => translate('messages.profile_deleted')],200);
+        }
+        return response()->json(['message' => translate('messages.profile_not_exist')], 403);
     }
 }

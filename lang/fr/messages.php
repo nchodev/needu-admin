@@ -85,4 +85,5 @@
   'New Match request' => 'New Match request',
   'unlike!' => 'Unlike!',
   'profile_update' => 'Profile update',
+  'profile_deleted' => 'Profile deleted',
 );

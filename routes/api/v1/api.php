@@ -6,8 +6,10 @@ Route::group(['namespace'=>'Api\V1'], function(){
     Route::group(['prefix'=>'auth','namespace'=>'Auth'], function(){
         Route::Post('/social-login','SocialAuthController@social_login');
     });
+    ///
+ 
 
-
+////
         Route::get('looking-for','FetchPreferencesController@lookingFor');
         Route::get('sex-orientation','FetchPreferencesController@sexOrientation');
         Route::get('interest','FetchPreferencesController@interest');
@@ -32,19 +34,17 @@ Route::group(['namespace'=>'Api\V1'], function(){
         Route::post('update-profile', 'UserController@update_profile');
         Route::get('filter-users', 'FetchUsersController@filter_users');
         Route::post('update-user-pref', 'UserController@update_user_pref');
-
-
         Route::post('like-user', 'MatchController@like_user');
         Route::post('unlike-user', 'MatchController@unlike_user');
         Route::get('liked-user', 'MatchController@liked_user');
         Route::post('match-request', 'MatchController@match_request');
         Route::get('gifts', 'GiftController@get_gift');
+        Route::delete('delete', 'UserController@delete');
         Route::group(['prefix'=>'chat','as'=>'chat.' ], function(){
             Route::post('send','ChatController@send');
             Route::get('get-user-chats','ChatController@get_user_chats');
             Route::get('get-all-chats','ChatController@get_all_chats');
             Route::get('match-stories/', 'UserStatusController@get_matche_stories');
-
         });
         Route::group(['prefix'=>'status','as'=>'status.' ], function(){
             Route::post('add', 'UserStatusController@add');

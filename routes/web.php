@@ -66,7 +66,7 @@ Route::group(['namespace'=>'Admin'], function(){
 });
 Route::get('/terms', function(){
     return view('web.terms');
-});
+})->withoutMiddleware([AdminAuth::class]);
 Route::get('/policy', function(){
     return view('web.policy');
-});
+})->withoutMiddleware([AdminAuth::class]);

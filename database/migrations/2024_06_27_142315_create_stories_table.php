@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('stories', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('user_id');
             $table->string('content');
             $table->string('thumbnail')->nullable();
             $table->foreignId('mood_id')->nullable();

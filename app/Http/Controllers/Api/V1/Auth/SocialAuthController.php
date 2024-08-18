@@ -7,6 +7,7 @@ use GuzzleHttp\Client;
 use App\Logique\Helpers;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\UserInfo;
 use Illuminate\Support\Facades\Validator;
 
 class SocialAuthController extends Controller
@@ -82,6 +83,20 @@ class SocialAuthController extends Controller
                                     'email_verified_at'=>now()
                                 ]
                         );
+                                UserInfo::create(
+                                    [
+                                        'user_id'=>$user->id,
+                                        'full_name'=>$full_name,
+                                        'nick_name'=>$nick_name,
+                                        'email'=>$email,
+                                        'current_lang'=>$lang,
+                                    ]
+                            );
+
+
+
+
+
 
                         $token = $user->createToken('UserToken')->accessToken;
 
