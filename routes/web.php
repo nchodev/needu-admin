@@ -64,3 +64,9 @@ Route::group(['namespace'=>'Admin'], function(){
     });
 
 });
+Route::get('/terms', function(){
+    return view('web.terms');
+});
+Route::get('/policy', function(){
+    return view('web.policy');
+});
