@@ -11,7 +11,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class SexOrientation extends Model
 {
     use HasFactory;
-
+    protected $fillable = [
+        'user_id',
+        'preference_addon_id'
+    ];
     protected $with = 'preferenceAddon';
 
     public function user(): BelongsTo

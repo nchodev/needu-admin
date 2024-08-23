@@ -24,6 +24,7 @@ class StoryResource extends JsonResource
             'dob' => (string) Carbon::parse($this->dob)->age,
             'position' => json_decode($this->position, true),
             'location' => $this->location,
+            'online'=>$this->online,
             'total_read_count' => $this->formatData($stories), // Appeler formatData
             'avatar' => $this->when($this->media->isNotEmpty(), function () {
                 $mediaResource = new MediaResource($this->media->first());

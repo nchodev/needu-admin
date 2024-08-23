@@ -86,4 +86,7 @@
   'unlike!' => 'Unlike!',
   'profile_update' => 'Profile update',
   'profile_deleted' => 'Profile deleted',
+  'operation failed!' => 'Operation failed!',
+  'offline' => 'Offline',
+  'profile_not_existe' => 'Profile not existe',
 );

@@ -24,7 +24,8 @@ class MatchController extends Controller
     {
         $this->firebaseService = $firebaseService;
     }
-    public function like_user(Request $request){
+    public function like_user(Request $request)
+    {
 
 
         $likerId = $request->user()->id;
@@ -200,12 +201,24 @@ class MatchController extends Controller
                 $match->delete();
             }
 
+            // Supprimer les messages entre les deux utilisateurs
+            Message::where(function ($query) use ($userId, $likedUserId) {
+                $query->where('sender_id', $userId)
+                      ->where('receiver_id', $likedUserId);
+            })
+            ->orWhere(function ($query) use ($userId, $likedUserId) {
+                $query->where('sender_id', $likedUserId)
+                      ->where('receiver_id', $userId);
+            })
+            ->delete();
+
             return response()->json(['message' => translate('messages.unlike!')], 200);
         }
 
         // Réponse en cas d'échec
         return response()->json(['message' => translate('messages.operation failed!')], 403);
     }
+
 
 
 

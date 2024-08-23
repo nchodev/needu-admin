@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Carbon\Carbon;
+use Illuminate\Support\Str;
 use Laravel\Passport\HasApiTokens;
 use Illuminate\Support\Facades\App;
 use Illuminate\Notifications\Notifiable;
@@ -49,6 +50,12 @@ class User extends Authenticatable
         'current_lang',
         'email_verified_at',
         'status',
+        'online',
+        'media_count',
+        'verified',
+        'slug',
+        'timezone',
+        'dob'
 
     ];
 
@@ -157,6 +164,33 @@ class User extends Authenticatable
     {
         return $this->hasOne(UserPreference::class);
     }
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($user) {
+            $user->slug = self::generateSlug($user->nick_name);
+        });
+
+        static::updating(function ($user) {
+            if ($user->isDirty('nick_name')) {
+                $user->slug = self::generateSlug($user->nick_name);
+            }
+        });
+    }
+
+    // Générer un slug à partir du nick_name
+    public static function generateSlug($nick_name)
+    {
+        // Convertir en slug et mettre en minuscule
+        $slug = Str::slug(Str::lower($nick_name));
+
+        // Assurer l'unicité du slug
+        $count = static::where('slug', 'LIKE', "{$slug}%")->count();
+
+        return $count ? "{$slug}-{$count}" : $slug;
+    }
+
     /**
      * The attributes that should be hidden for serialization.
      *

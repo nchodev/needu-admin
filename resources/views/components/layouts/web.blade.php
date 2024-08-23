@@ -42,47 +42,13 @@
         <!-- PAGE -->
 		<div class="page">
             <div class="page-main">
-
-                <!-- MAIN-HEADER -->
-                @include('components.main-header')
-
-                <!-- END MAIN-HEADER -->
-
-                <!-- NEWS-TICKER -->
-                @include('components.news-ticker')
-
-                <!-- END NEWS-TICKER -->
-
-                <!-- MAIN-SIDEBAR -->
-                @include('components.main-sidebar')
-
-                <!-- END MAIN-SIDEBAR -->
-
-                <!-- MAIN-CONTENT -->
-                <div class="main-content app-content">
                     <div class="side-app">
                         <!-- CONTAINER -->
                         <div class="main-container container-fluid">
                               @yield('content')
                         </div>
                     </div>
-                    @yield('modal-page-content')
-                </div>
-                <!-- END MAIN-CONTENT -->
             </div>
-
-            @yield('modal-page-content1')
-
-            <!-- RIGHT-SIDEBAR -->
-            @include('components.right-sidebar')
-
-            <!-- END RIGHT-SIDEBAR -->
-
-            <!-- MAIN-FOOTER -->
-            @include('components.main-footer')
-
-            <!-- END MAIN-FOOTER -->
-
 		</div>
         <!-- END PAGE-->
 

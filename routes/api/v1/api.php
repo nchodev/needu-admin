@@ -7,7 +7,9 @@ Route::group(['namespace'=>'Api\V1'], function(){
         Route::Post('/social-login','SocialAuthController@social_login');
     });
     ///
- 
+    Route::get('user-info/{id}', 'UserController@info');
+    Route::get('get-all-chats','ChatController@get_all_chats');
+
 
 ////
         Route::get('looking-for','FetchPreferencesController@lookingFor');
@@ -40,6 +42,7 @@ Route::group(['namespace'=>'Api\V1'], function(){
         Route::post('match-request', 'MatchController@match_request');
         Route::get('gifts', 'GiftController@get_gift');
         Route::delete('delete', 'UserController@delete');
+        Route::post('offline', 'UserController@offline');
         Route::group(['prefix'=>'chat','as'=>'chat.' ], function(){
             Route::post('send','ChatController@send');
             Route::get('get-user-chats','ChatController@get_user_chats');

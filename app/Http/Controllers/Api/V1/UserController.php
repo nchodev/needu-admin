@@ -27,69 +27,112 @@ use Illuminate\Pagination\LengthAwarePaginator;
 
 class UserController extends Controller
 {
-    public function user_register(Request $request){
 
-        $validator = Validator::make($request->all(),[
-            'looking_for'=>'required',
-            'birthdate'=>'required',
-            'sex_orientation'=>'required',
-            'nick_name'=>'required|',
-            'interests'=>'required',
-            'gender'=>'required'
+    public function user_register(Request $request)
+    {
+        Log::info('Début de l\'enregistrement de l\'utilisateur', ['user_id' => $request->user()->id]);
+
+        // Validation des données
+        $validator = Validator::make($request->all(), [
+            'looking_for' => 'required',
+            'birthdate' => 'required',
+            'sex_orientation' => 'required',
+            'nick_name' => 'required',
+            'interests' => 'required',
+            'gender' => 'required'
         ]);
-        if($validator->fails()){
-            return response()->json(['errors'=>Helpers::error_processor($validator)],403);
+
+        if ($validator->fails()) {
+            Log::warning('Validation échouée', ['errors' => $validator->errors()]);
+            return response()->json(['errors' => Helpers::error_processor($validator)], 403);
         }
 
-        $user = User::findOrFail($request->user()->id);
-        $user->dob = $request->birthdate;
-        $user->nick_name = $request->nick_name;
-        $user->status = 1;
-        $userInfo = UserInfo::where('user_id', $request->user()->id)->first();
-        $userInfo->dob = $request->birthdate;
-        $userInfo->nick_name = $request->nick_name;
-        $userInfo->save();
+        // Utilisation d'une transaction pour garantir l'intégrité des données
+        DB::beginTransaction();
+        try {
+            Log::info('Transaction commencée');
 
-        $looking = new LookingFor();
-        $looking->user_id = $request->user()->id;
-        $looking->preference_addon_id = $request->looking_for;
-        $looking->save();
+            // Récupération de l'utilisateur connecté
+            $user = $request->user();
+            Log::info('Utilisateur trouvé', ['user_id' => $user->id]);
 
-        $sex_or = new SexOrientation();
-        $sex_or->user_id = $request->user()->id;
-        $sex_or->preference_addon_id = $request->sex_orientation;
-        $sex_or->save();
+            $user->update([
+                'dob' => $request->birthdate,
+                'nick_name' => $request->nick_name,
+                'status' => 1
+            ]);
+            Log::info('Informations utilisateur mises à jour');
 
-        $gender = new UserGender();
-        $gender->user_id =  $request->user()->id;
-        $gender->preference_addon_id = $request->gender;
-        $gender->save();
+            // Mise à jour ou insertion dans user_infos
+            UserInfo::updateOrCreate(
+                ['user_id' => $user->id],
+                ['dob' => $request->birthdate, 'nick_name' => $request->nick_name,  'email'=>$user->email]
+            );
+            Log::info('Informations utilisateur dans user_infos mises à jour ou insérées');
 
+            // Création ou mise à jour des préférences
+            LookingFor::updateOrCreate(
+                ['user_id' => $user->id],
+                ['preference_addon_id' => $request->looking_for]
+            );
+            Log::info('Préférence LookingFor mise à jour ou insérée');
 
-        foreach(json_decode($request->interests, true) as $interest){
-            $interests = new Interest();
-            $interests->user_id = $request->user()->id;
-            $interests->preference_addon_id = $interest;
-            $interests->save();
-        }
-        if ($request->hasFile('profile_images')) {
-            foreach ($request->file('profile_images') as $image) {
+            SexOrientation::updateOrCreate(
+                ['user_id' => $user->id],
+                ['preference_addon_id' => $request->sex_orientation]
+            );
+            Log::info('Préférence SexOrientation mise à jour ou insérée');
+
+            UserGender::updateOrCreate(
+                ['user_id' => $user->id],
+                ['preference_addon_id' => $request->gender]
+            );
+            Log::info('Préférence UserGender mise à jour ou insérée');
+
+            // Création des intérêts
+            $interests = array_map(function ($interest) use ($user) {
+                return ['user_id' => $user->id, 'preference_addon_id' => $interest];
+            }, json_decode($request->interests, true));
+
+            Interest::upsert($interests, ['user_id', 'preference_addon_id']);
+            Log::info('Intérêts ajoutés ou mis à jour', ['interests' => $interests]);
+
+            // Gestion des images de profil
+            if ($request->hasFile('profile_images')) {
+                $profileImages = [];
+                foreach ($request->file('profile_images') as $image) {
                     $imageName = Helpers::upload('profile/', 'png', $image);
-                    $profileImage = new Media();
-                    $profileImage->file = $imageName;
-                    $profileImage->type = 'image';
-                    $profileImage->user_id = $request->user()->id;
-                    $profileImage->save();
+                    $profileImages[] = [
+                        'file' => $imageName,
+                        'type' => 'image',
+                        'user_id' => $user->id
+                    ];
+                    Log::info('Image de profil uploadée', ['image' => $imageName]);
                 }
-        }
-            $user->save();
+                Media::insert($profileImages);
+                Log::info('Images de profil insérées dans la base de données');
+            }
+
+            // Création du token d'accès
             $token = $user->createToken('UserToken')->accessToken;
+            Log::info('Token d\'accès créé', ['token' => $token]);
 
-            return response()->json(['token'=>$token,'user' => $user ], 200);
+            // Validation réussie, commit de la transaction
+            DB::commit();
+            Log::info('Transaction commitée avec succès');
+
+            // Réponse réussie
+            return response()->json(['token' => $token, 'user' => $user], 200);
+        } catch (\Exception $e) {
+            // En cas d'erreur, rollback de la transaction
+            DB::rollBack();
+            Log::error('Erreur lors de l\'enregistrement de l\'utilisateur', ['exception' => $e->getMessage()]);
+            return response()->json(['error' => 'Une erreur est survenue. Veuillez réessayer plus tard.'], 500);
+        }
+    }
 
 
-       }
-    public function update_cm_firebase_token(Request $request)
+       public function update_cm_firebase_token(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'cm_firebase_token' => 'required',
@@ -135,7 +178,9 @@ class UserController extends Controller
         } else{
 
             $user = User::with(['stories','likesGiven'])->withCount('stories')->find($id);
-
+            if(!$user){
+                return response()->json(["message"=> translate('messages.profile_not_existe')], 404);
+            }
         }
         // return $user;
         // return $user->likesGiven->pluck('liked_id');
@@ -161,35 +206,48 @@ class UserController extends Controller
     }
 
     public function address(Request $request){
+
         $validator = Validator::make($request->all(),[
             "address"=>"required",
             "latitude"=>"required",
             "longitude"=>"required",
         ]);
+
         if($validator->fails()){
             return response()->json(['errors'=>Helpers::error_processor($validator)],403);
         }
 
         $user = User::findOrFail($request->user()->id);
         $user->location= $request->address;
+        $user->online = 1;
+        $user->timezone = $request->time_zone;
         $user->position = json_encode(
             [
                 'longitude' => $request['longitude'],
                 'latitude' => $request['latitude']
             ]
         );
-        $userInfo = UserInfo::where('user_id', $request->user()->id)->first();
 
-        $userInfo->position = json_encode(
+
+        $position = json_encode(
             [
                 'longitude' => $request['longitude'],
                 'latitude' => $request['latitude']
             ]
         );
-        $userInfo->location= $request->address;
 
-        $userInfo->save();
+
+
         $user->save();
+
+        DB::table('user_infos')->updateOrInsert(
+            ['user_id' => $request->user()->id], // Condition pour update ou insert
+            [
+                'position'=>$position,
+                'location'=> $request->address,
+
+            ]
+        );
 
         return response()->json(['message' => 'Position updated successfully']);
 
@@ -240,7 +298,7 @@ class UserController extends Controller
     public function update_profile(Request $request)
     {
             $user = User::findOrfail($request->user()->id);
-            $userInfo = UserInfo::where('user_id', $request->user()->id)->first();
+            // $userInfo = UserInfo::where('user_id', $request->user()->id)->first();
 
             $user->nick_name = isset($request->nick_name)?$request->nick_name:$user->nick_name;
             $user->phone = isset($request->phone)?$request->phone:$user->phone;
@@ -253,18 +311,22 @@ class UserController extends Controller
             $user->company = isset($request->company)?$request->company:$user->company;
             $user->profession = isset($request->profession)?$request->profession:$user->profession;
 
-            $userInfo->nick_name = isset($request->nick_name)?$request->nick_name:$user->nick_name;
-            $userInfo->phone = isset($request->phone)?$request->phone:$user->phone;
-            $userInfo->email = isset($request->email)?$request->email:$user->email;
-            $userInfo->height = isset($request->height)?$request->height:$user->height;
-            $userInfo->dob = isset($request->dob)?$request->dob:$user->dob;
-            $userInfo->bio = isset($request->bio)?$request->bio:$user->bio;
-            $userInfo->company = isset($request->company)?$request->company:$user->company;
-            $userInfo->profession = isset($request->profession)?$request->profession:$user->profession;
-            $userInfo->education = isset($request->education)?$request->education:$user->education;
+            DB::table('user_infos')->updateOrInsert(
+                ['user_id' => $request->user()->id], // Condition pour update ou insert
+                [
+                    'nick_name' => $request->nick_name ?? $user->nick_name,
+                    'phone' => $request->phone ?? $user->phone,
+                    'email' => $request->email ?? $user->email,
+                    'height' => $request->height ?? $user->height,
+                    'dob' => $request->dob ?? $user->dob,
+                    'bio' => $request->bio ?? $user->bio,
+                    'company' => $request->company ?? $user->company,
+                    'profession' => $request->profession ?? $user->profession,
+                    'education' => $request->education ?? $user->education,
+                ]
+            );
 
             $user->save();
-            $userInfo->save();
             if(isset($request->sex_orientation)){
                 $se= SexOrientation::Where('user_id' , $request->user()->id)->first();
                 $se->preference_addon_id =$request->sex_orientation;
@@ -366,14 +428,13 @@ class UserController extends Controller
         return response()->json(['message' => translate('messages.profile_updated_successfully')], 200);
     }
 
-    public function update_user_pref(Request $request){
+    public function update_user_pref(Request $request)
+    {
 
 
 
         // $table->unsignedBigInteger('marital_status_id')->nullable();
         // $table->json('more_about_ids')->nullable();
-        // $table->json('spoken_languages')->nullable();
-        // $table->json('interests')->nullable();
         // $table->string('country')->nullable();
         if(isset($request->looking_for_ids)){
             DB::table('user_preferences')->updateOrInsert(['user_id' => $request->user()->id], [
@@ -423,11 +484,20 @@ class UserController extends Controller
         //     ]);
         // }
 
-    return response()->json(['message' => translate('messages.profile_update')]);
-
-
+         return response()->json(['message' => translate('messages.profile_update')]);
     }
-    public function delete(Request $request){
+    public function offline(Request $request){
+
+        $user = $request->user();
+        if($user){
+            $user->online=0;
+            $user->save();
+            return response()->json(['message' => translate('messages.offline')],200);
+        }
+        return response()->json(['message' => translate('messages.operation_failed')], 403);
+    }
+    public function delete(Request $request)
+    {
 
         $user = $request->user();
         if($user){

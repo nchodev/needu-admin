@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use Carbon\Carbon;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -33,6 +34,10 @@ class UserResource extends JsonResource
             'company' => $this->company,
             'profession' => $this->profession,
             'stories_count'=>$this->stories_count,
+            'online'=>$this->online,
+            'media_count'=>$this->media_count,
+            'verified'=>$this->verified,
+            'slug'=>$this->slug??Str::lower($this->nick_name),
             'looking_for' => $this->whenLoaded('lookingFor', function () {
                 $preferenceAddonResource = new PreferenceAddonResource($this->lookingFor->preferenceAddon);
                 // Exclure 'parent' de l'array retourné par toArray de PreferenceAddonResource

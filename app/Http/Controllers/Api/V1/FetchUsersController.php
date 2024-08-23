@@ -22,7 +22,7 @@ public function filter_users(Request $request)
 
         $usersQuery = User::Active()
             ->notLikedUsers( $request->user()->id)
-            ->where('id', '!=',  $request->user()->id);
+            ->where('id', '!=',  $request->user()->id)->where('position', '!=', null);
 
 
     $preferences = $currentUser->preferences;
@@ -65,7 +65,7 @@ public function filter_users(Request $request)
                 $usersQuery->whereHas('lookingFor.preferenceAddon', function ($query) use ($lookingForIds) {
                     $query->where('id', $lookingForIds);
                 });
-        
+
         }
         if ($preferences->more_about_ids) {
             $moreAboutIds = json_decode($preferences->more_about_ids, true);

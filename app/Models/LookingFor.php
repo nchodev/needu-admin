@@ -9,6 +9,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class LookingFor extends Model
 {
+
+    protected $fillable = [
+        'user_id',
+        'preference_addon_id'
+    ];
     protected $casts = [
         'status' => 'integer'
     ];

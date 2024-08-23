@@ -17,7 +17,10 @@ class UserInfo extends Model
         "current_lang",
         'height',
         'phone',
-        'education'
-
+        'education',
+        'dob',
+        'bio',
+        'company',
+        'profession'
     ];
 }

@@ -44,7 +44,7 @@ class UserStatusController extends Controller
         if (!$request->hasFile('image') && (!$request->hasFile('video') || !$request->hasFile('cover'))) {
             return response()->json(['message' => translate('messages.operation_failed')], 403);
         }
-    try {
+     try {
             // Commencer une transaction
             DB::beginTransaction();
             $storyIds = [];
@@ -213,14 +213,14 @@ class UserStatusController extends Controller
         ->with(['user1.activeStories', 'user2.activeStories'])
         ->get();
 
-    // Extraire les utilisateurs des matchs et éliminer ceux qui n'ont pas de stories actives
-    $users = $matches->map(function($match) use ($userId) {
-        return $match->user1_id == $userId ? $match->user2 : $match->user1;
-    })
-    ->filter(function($user) {
-        return $user->activeStories->isNotEmpty();
-    });
-    return UserMatchStoryResource::collection($users) ;
+                // Extraire les utilisateurs des matchs et éliminer ceux qui n'ont pas de stories actives
+                $users = $matches->map(function($match) use ($userId) {
+                    return $match->user1_id == $userId ? $match->user2 : $match->user1;
+                })
+                ->filter(function($user) {
+                    return $user->activeStories->isNotEmpty();
+                });
+                return UserMatchStoryResource::collection($users) ;
 
 
 

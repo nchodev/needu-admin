@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('messages', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('user_match_id')->nullable(); // Référence au match
-                $table->foreignId('sender_id')->constrained('users'); // Référence à l'utilisateur expéditeur
-                $table->foreignId('receiver_id')->constrained('users'); // Référence à l'utilisateur destinataire
+                $table->foreignId('sender_id');
+                $table->foreignId('receiver_id');
                 $table->text('content'); // Contenu du message
                 $table->tinyInteger('one_view')->default(0)->comment('0:inactf, 1:actif, 2: deja vu');
                 $table->enum('type',['text','media','voice','match','request','info','gift'])->default('text');
